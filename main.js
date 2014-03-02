@@ -14,22 +14,48 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('viewport').appendChild(renderer.domElement);
 
 var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.z = 5;
+camera.position.z = 1.7;
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-var i = 1;
 
-var hex = new THREE.HexGeometry(1, 6, i, true);
+var sphereRadius = 1, segments = 40, rings = 5;
+var radius = (sphereRadius / (rings) * Math.PI) / 2 ;
+var mesh = [];
 
-var hex2 = new THREE.HexGeometry(1, 6, i+1, false);
+var geo = [];
 
-var mesh = new THREE.Mesh(hex,new THREE.MeshNormalMaterial({wireframe: true }));
-var mesh2 = new THREE.Mesh(hex2,new THREE.MeshNormalMaterial({wireframe: true }));
+for (var i = 0; i < rings; i++) {
+    var centerGeo = normalizeGeo(new THREE.HexGeometry(radius, segments, 0));
+    var outerGeo = normalizeGeo(new THREE.HexGeometry(radius, segments, segments / 2));
+    if (i == 0) {
+        geo[i] = centerGeo.clone();
+    }
+    else {
+        geo[i] = outerGeo.clone();
+    }
+    mesh[i] = new THREE.Mesh(projectGeo(geo[i], sphereRadius), new THREE.MeshNormalMaterial({wireframe: true }));
+    scene.add(mesh[i]);
 
-mesh.position = new THREE.Vector3(-1,0,0);
-mesh2.position = new THREE.Vector3(1,0,0);
-scene.add(mesh);
-scene.add(mesh2);
+    radius *= 2;
+}
+
+function normalizeGeo(geo) {
+    var vertices = geo.vertices;
+    for (var i = 0; i < vertices.length; i++) {
+        vertices[i].z = sphereRadius;
+        vertices[i] = vertices[i].normalize();
+    }
+    return geo;
+}
+
+function projectGeo(geo, rad) {
+    var vertices = geo.vertices;
+    for (var i = 0; i < vertices.length; i++) {
+        vertices[i].multiplyScalar(rad);
+    }
+    return geo;
+}
+
 
 function render() {
     requestAnimationFrame(render);

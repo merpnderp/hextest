@@ -7,44 +7,48 @@
  * @author lmg / https://github.com/kishalmi
  */
 
-THREE.HexGeometry = function (radius, segments, startSegment, drawCenter, theta) {
+THREE.HexGeometry = function (radius, segments, startSegment, theta) {
 
     THREE.Geometry.call(this);
 
     this.radius = radius || 50;
     this.segments = (segments !== undefined) ? Math.max(1, segments) : 1;
+    this.startSegment = (startSegment !== undefined) ? Math.max(0, startSegment) : 1;
     this.theta = (theta !== undefined) ? theta : 0;
 
     var n = new THREE.Vector3(0, 0, 1);
 
+    var z = 0;
+
 // center
-    if(drawCenter){
-        startSegment = 1;
-        this.vertices.push(new THREE.Vector3(0, 0, 0));
+    var drawCenter = false;
+    if(this.startSegment == 0){
+        this.startSegment = 1;
+        drawCenter = true;
+        this.vertices.push(new THREE.Vector3(0, 0, z));
     }
     var nVertex = 0;
     var nVertexRing = 1;
 
     var buildFace = false;
+
 // add rings
-    for (var iRing = startSegment; iRing <= this.segments; iRing++) {
-        if (iRing > startSegment || drawCenter) {
+    for (var iRing = this.startSegment; iRing <= this.segments; iRing++) {
+        if (iRing > this.startSegment || drawCenter) {
             buildFace = true;
         }
 //   for (var iRing = 1; iRing <= this.segments; iRing++) {
         var r = this.radius * iRing / this.segments;
         var nVertexInner = nVertex;
         nVertex = this.vertices.length;
-        console.log("iRing: " + iRing + " : nVertex: " + nVertex);
         var nVertexRingInner = nVertexRing;
         nVertexRing = iRing * 6;
 
         for (var iSide = 0; iSide < 6; iSide++) {
-            console.log("iSide " + iSide);
             var a1 = this.theta + iSide / 6 * 2 * Math.PI;
             var a2 = this.theta + (iSide + 1) / 6 * 2 * Math.PI;
-            var v1 = new THREE.Vector3(r * Math.sin(a1), r * Math.cos(a1), 0);
-            var v2 = new THREE.Vector3(r * Math.sin(a2), r * Math.cos(a2), 0);
+            var v1 = new THREE.Vector3(r * Math.sin(a1), r * Math.cos(a1), z);
+            var v2 = new THREE.Vector3(r * Math.sin(a2), r * Math.cos(a2), z);
 
             for (var iLerp = 0; iLerp < iRing; iLerp++) {
                 var l = iLerp / iRing;
